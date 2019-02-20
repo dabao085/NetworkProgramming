@@ -4,7 +4,7 @@
  * 一个简单的压测工具
 */
 
-#include "include/network.h"
+#include "network.h"
 #include <iostream>
 #include <stdio.h>
 #include <string>

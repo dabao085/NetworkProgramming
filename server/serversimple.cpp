@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 
     printf("connected with %d\n", sockcli);
     const char *hello = "hello from serv";
-    write(sockcli, hello, stelen(hello));
+    write(sockcli, hello, strlen(hello));
 
     close(sockcli);
 
