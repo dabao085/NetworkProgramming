@@ -5,11 +5,6 @@
 */
 
 #include "network.h"
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <assert.h>
-#include <stdio.h>
 
 int main(int argc, char *argv[])
 {
@@ -19,38 +14,18 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    const char* ip = argv[1];
+    const char *ip = argv[1];
     int port = atoi(argv[2]);
-    assert(port > 0);
-
-    struct sockaddr_in servaddr;
-    memset(&servaddr, 0, sizeof(servaddr));
-    servaddr.sin_family = AF_INET;
-    //servaddr.sin_addr.s_addr = inet_addr(ip); 
-    inet_pton(AF_INET, ip, &servaddr.sin_addr);
-    servaddr.sin_port = htons(port);
-
-    int sockserv = socket(AF_INET, SOCK_STREAM, 0);
-    if(sockserv < 0)
+    int sockserv;
+    if(Connect(ip, port, &sockserv) < 0)
     {
-        printf("socket error!\n");
+        printf("Connect error!\n");
         return -1;
     }
 
-    if(bind(sockserv, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0)
-    {
-        printf("bind error!\n");
-        return -1;
-    }
-
-    if(listen(sockserv, 10) < 0)
-    {
-        printf("listen error!\n");
-        return -1;
-    }
-
-    socklen_t clilen = sizeof(servaddr);
-    int sockcli = accept(sockserv, (struct sockaddr*)&servaddr, &clilen);
+    struct sockaddr_in cliaddr;
+    socklen_t clilen = sizeof(cliaddr);
+    int sockcli = accept(sockserv, (struct sockaddr*)&cliaddr, &clilen);
     assert(sockcli > 0);
 
     printf("connected with %d\n", sockcli);
@@ -58,6 +33,7 @@ int main(int argc, char *argv[])
     write(sockcli, hello, strlen(hello));
 
     close(sockcli);
+    close(sockserv);
 
     return 0;
 }

@@ -5,14 +5,9 @@
 */
 
 #include "network.h"
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <assert.h>
-#include <stdio.h>
 #include <pthread.h>
 
-#define MAX_THREAD 20
+const int MAX_THREAD = 20;
 
 void *handleConnection(void *args)
 {
@@ -21,6 +16,7 @@ void *handleConnection(void *args)
     const char * hello = "hello from serv";
     write(sockcli, hello, strlen(hello));
 
+    close(sockcli);
     pthread_exit(NULL);
 }
 
@@ -34,40 +30,21 @@ int main(int argc, char *argv[])
 
     const char* ip = argv[1];
     int port = atoi(argv[2]);
-    assert(port > 0);
-
-    struct sockaddr_in servsock;
-    memset(&servsock, 0, sizeof(servsock));
-    servsock.sin_family = AF_INET;
-    inet_pton(AF_INET, ip, &servsock.sin_addr);
-    servsock.sin_port = htons(port);
-
-    int sockserv = socket(AF_INET, SOCK_STREAM, 0);
-    if(sockserv < 0)
+    int sockserv;
+    if(Connect(ip, port, &sockserv) < 0)
     {
-        printf("socket error!\n");
+        printf("Connect error!\n");
         return -1;
     }
 
-    if(bind(sockserv, (struct sockaddr*)&servsock, sizeof(servsock)) < 0)
-    {
-        printf("bind error!\n");
-        return -1;
-    }
-
-    if(listen(sockserv, 100) < 0)
-    {
-        printf("listen error!\n");
-        return -1;
-    }
-
-    socklen_t clilen = sizeof(servsock);
+    struct sockaddr_in cliaddr;
+    socklen_t clilen = sizeof(cliaddr);
     pthread_t threads[MAX_THREAD];
     int index = 0, ret = 0;
     int sockcli;
     while(1)
     {
-        sockcli = accept(sockserv, (struct sockaddr*)&servsock, &clilen);
+        sockcli = accept(sockserv, (struct sockaddr*)&cliaddr, &clilen);
         if(sockcli < 0)
         {
             printf("accept error!\n");
@@ -83,6 +60,7 @@ int main(int argc, char *argv[])
         }
         printf("thread create successfully\n");
     }
-
+    
+    close(sockserv);
     return 0;
 }

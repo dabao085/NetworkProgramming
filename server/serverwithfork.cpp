@@ -5,11 +5,6 @@
 */
 
 #include "network.h"
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <assert.h>
-#include <stdio.h>
 
 //用于回收已完成子进程的信息，防止出现僵尸进程
 void sig_chld(int sig)
@@ -31,42 +26,21 @@ int main(int argc, char *argv[])
 
     const char* ip = argv[1];
     int port = atoi(argv[2]);
-    assert(port > 0);
-
-    struct sockaddr_in servaddr;
-    memset(&servaddr, 0, sizeof(servaddr));
-    servaddr.sin_family = AF_INET;
-    //servaddr.sin_addr.s_addr = inet_addr(ip); 
-    inet_pton(AF_INET, ip, &servaddr.sin_addr);
-    servaddr.sin_port = htons(port);
-
-    int sockserv = socket(AF_INET, SOCK_STREAM, 0);
-    if(sockserv < 0)
+    int sockserv;
+    if(Connect(ip, port, &sockserv) < 0)
     {
-        printf("socket error!\n");
-        return -1;
-    }
-
-    if(bind(sockserv, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0)
-    {
-        printf("bind error!\n");
-        return -1;
-    }
-
-    if(listen(sockserv, 1000) < 0)
-    {
-        printf("listen error!\n");
+        printf("Connect error!\n");
         return -1;
     }
 
     signal(SIGCHLD, sig_chld);
 
-    socklen_t clilen = sizeof(servaddr);
-    int sockcli;
-    int num = 0;
+    struct sockaddr_in cliaddr;
+    socklen_t clilen = sizeof(cliaddr);
+    int sockcli, num = 0;
     while(1)
     {
-        if((sockcli = accept(sockserv, (struct sockaddr*)&servaddr, &clilen)) < 0)
+        if((sockcli = accept(sockserv, (struct sockaddr*)&cliaddr, &clilen)) < 0)
         {
             printf("accept error!\n");
             return -1;
@@ -94,5 +68,6 @@ int main(int argc, char *argv[])
         }
     }
 
+    close(sockserv);
     return 0;
 }

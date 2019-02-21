@@ -5,11 +5,6 @@
 */
 
 #include "network.h"
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <assert.h>
-#include <stdio.h>
 #include <sys/epoll.h>
 
 const int MAX_EVENTS = 16;
@@ -24,26 +19,10 @@ int main(int argc, char *argv[])
 
     const char *ip = argv[1];
     int port = atoi(argv[2]);
-    assert(port > 0);
-
-    struct sockaddr_in servsock, clisock;
-    memset(&servsock, 0, sizeof(servsock));
-    servsock.sin_family = AF_INET;
-    inet_pton(AF_INET, ip, &servsock.sin_addr);
-    servsock.sin_port = htons(port);
-
-    int sockserv = socket(AF_INET, SOCK_STREAM, 0);
-    assert(sockserv > 0);
-
-    if(bind(sockserv, (struct sockaddr*)&servsock, sizeof(servsock)) < 0)
+    int sockserv;
+    if(Connect(ip, port, &sockserv) < 0)
     {
-        printf("bind error!\n");
-        return -1;
-    }
-
-    if(listen(sockserv, 100) < 0)
-    {
-        printf("listen error!\n");
+        printf("Connect error!\n");
         return -1;
     }
 
@@ -64,7 +43,6 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    //
     int event_count = 0;
     while(1)
     {
@@ -76,10 +54,10 @@ int main(int argc, char *argv[])
             assert(fd > 0);
             if(fd == sockserv)//new connection
             {
-                socklen_t clilen = sizeof(clisock);
-                int sockcli = accept(fd, (struct sockaddr*)&clisock, &clilen);
+                struct sockaddr_in cliaddr;
+                socklen_t clilen = sizeof(cliaddr);
+                int sockcli = accept(fd, (struct sockaddr*)&cliaddr, &clilen);
                 assert(sockcli > 0);
-                // epoll_event event;
                 event.data.fd = sockcli;
                 event.events = EPOLLIN | EPOLLET;
                 epoll_ctl(epoll_fd, EPOLL_CTL_ADD, sockcli, &event);

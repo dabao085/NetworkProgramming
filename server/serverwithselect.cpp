@@ -5,14 +5,9 @@
 */
 
 #include "network.h"
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <assert.h>
-#include <stdio.h>
 
-#define MAX_SELECT 100
-#define MAX_BUFF 1024
+const int MAX_SELECT = 100;
+const int MAX_BUFF = 1024;
 
 int main(int argc, char *argv[])
 {
@@ -24,30 +19,10 @@ int main(int argc, char *argv[])
 
     const char * ip = argv[1];
     int port = atoi(argv[2]);
-    assert(port > 0);
-
-    struct sockaddr_in servsock;
-    memset(&servsock, 0, sizeof(servsock));
-    servsock.sin_family = AF_INET;
-    inet_pton(AF_INET, ip, &servsock.sin_addr);
-    servsock.sin_port = htons(port);
-
-    int sockserv = socket(AF_INET, SOCK_STREAM, 0);
-    if(sockserv < 0)
+    int sockserv;
+    if(Connect(ip, port, &sockserv) < 0)
     {
-        printf("socket error!\n");
-        return -1;
-    }
-
-    if(bind(sockserv, (struct sockaddr*)&servsock, sizeof(servsock)) < 0)
-    {
-        printf("bind error!\n");
-        return -1;
-    }
-
-    if(listen(sockserv, 1) < 0)
-    {
-        printf("listen error!\n");
+        printf("Connect error!\n");
         return -1;
     }
 
@@ -71,8 +46,9 @@ int main(int argc, char *argv[])
                 if(i == sockserv)
                 {
                     //新连接
-                    socklen_t clilen = sizeof(servsock);
-                    int sockcli = accept(sockserv, (struct sockaddr*)&servsock, &clilen);
+                    struct sockaddr_in cliaddr;
+                    socklen_t clilen = sizeof(cliaddr);
+                    int sockcli = accept(sockserv, (struct sockaddr*)&cliaddr, &clilen);
                     assert(sockcli > 0);
 
                     FD_SET(sockcli, &active_fd_set);
@@ -94,5 +70,6 @@ int main(int argc, char *argv[])
         }
     }
 
+    close(sockserv);
     return 0;
 }
