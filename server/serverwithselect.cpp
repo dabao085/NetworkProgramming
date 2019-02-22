@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
                 else//已有连接
                 {
                     char buff[MAX_BUFF];
+                    memset(buff, '\0', MAX_BUFF);
                     int ret = read(i, buff, MAX_BUFF);
                     if(ret > 0)
                         printf("RecvBuff: %s\n", buff);

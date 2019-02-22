@@ -1,11 +1,11 @@
 /*
  * Author: Chengxiang
- * Date: 2019-2-19
- * header file of network
+ * Date: 2019-2-22
+ * header file of chatroom
 */
 
-#ifndef _NETWORK_H_
-#define _NETWORK_H_
+#ifndef _CHATROOM_H_
+#define _CHATROOM_H_
 
 #include <sys/socket.h>    
 #include <netinet/in.h>    
@@ -17,7 +17,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdio.h>
-
-int Connect(const char *ip_address, int port, int *fd);
+#include <sys/poll.h>
+#include <fcntl.h>
 
 #endif

@@ -8,6 +8,7 @@
 #include <sys/epoll.h>
 
 const int MAX_EVENTS = 16;
+const int MAX_BUFF = 1024;
 
 int main(int argc, char *argv[])
 {
@@ -64,11 +65,11 @@ int main(int argc, char *argv[])
             }
             else if(events[i].events & EPOLLIN)//existed(old) connection
             {
-                char buff[1024];
-                int ret = read(fd, buff, 1024);
+                char buff[MAX_BUFF];
+                memset(buff, '\0', MAX_BUFF);
+                int ret = read(fd, buff, MAX_BUFF);
                 if(ret > 0)
                 {
-                    buff[ret] = '\0';
                     printf("REC %d characters: %s\n", ret, buff);
                     event.data.fd = fd;
                     event.events = EPOLLOUT | EPOLLET;

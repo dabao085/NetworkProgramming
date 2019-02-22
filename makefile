@@ -1,4 +1,4 @@
-SUBDIRS = client server
+SUBDIRS = client server chatroom
 all: ${SUBDIRS}
 ${SUBDIRS}:ECHO
 	make -C $@
