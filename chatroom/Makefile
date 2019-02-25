@@ -1,5 +1,5 @@
-TARGET = chatroomclient 
-OBJS = chatroomclient.o chatroom.o
+TARGET = chatroomclient chatroomserver
+OBJS = chatroomclient.o chatroomserver.o chatroom.o
 CFLAG = 
 all: ${OBJS}
 ${OBJS}: %.o: %.cpp

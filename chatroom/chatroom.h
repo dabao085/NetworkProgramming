@@ -19,5 +19,6 @@
 #include <stdio.h>
 #include <sys/poll.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #endif

@@ -5,7 +5,8 @@
 */
 
 #include "chatroom.h"
-const int MAX_USERS = 1024;
+#include <ctime>
+const int MAX_USERS = 5;
 const int MAX_BUFF = 1024;
 
 int main(int argc, char *argv[])
@@ -50,11 +51,12 @@ int main(int argc, char *argv[])
     }
 
     fds[0].fd = sockserv;
-    fds[0].events = POLLIN;
-    fds[0].revents = -1;
+    fds[0].events = POLLIN | POLLERR;
+    fds[0].revents = 0;
 
     int connectedCount = 0;
     char buff[MAX_BUFF];
+    char finalBuff[MAX_BUFF];
     while(1)
     {
         int ret = poll(fds, connectedCount + 1, -1);
@@ -85,26 +87,51 @@ int main(int argc, char *argv[])
                     fds[connectedCount].fd = sockcli;
                     fds[connectedCount].events = POLLIN | POLLRDHUP | POLLERR;
                     fds[connectedCount].revents = 0;
+                    printf("connection from %d\n", sockcli);
                 }                
+            }
+            else if(fds[i].revents & POLLRDHUP)//客户端关闭
+            {
+                close(fds[i].fd);
+                fds[i] = fds[connectedCount];
+                connectedCount--;
+                printf("client %d left\n", fds[i].fd);
+            }
+            else if(fds[i].revents & POLLERR)//连接发生错误
+            {
+                printf("connection error from %d\n", fds[i].fd);
+                continue;
             }
             else if(fds[i].revents & POLLIN)//已有连接
             {
                 memset(buff, '\0', MAX_BUFF);
-                recv(fds[i].fd, buff, MAX_BUFF, 0);
+                ret = recv(fds[i].fd, buff, MAX_BUFF, 0);
+                assert(ret >= 0);
+                printf("Rec from %d: %s\n", fds[i].fd, buff);
 
-                fds[i].events = POLLOUT;
+                //加上时间信息
+                time_t rawtime;
+                struct tm * timeinfo;
+                char buffer[80];
+                time(&rawtime);
+                timeinfo = localtime(&rawtime);
+                strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
+
+                sprintf(finalBuff, "%d: %s %s\n", fds[i].fd, buffer, buff);
+
+                for(int j = 1; j < connectedCount + 1; ++j)
+                {
+                    if((fds[j].fd != sockserv))//不发送给监听套接字
+                    {
+                        fds[j].events = POLLOUT;
+                    }
+                }
             }
-            else if(fds[i].revents & POLLOUT)
+            else if(fds[i].revents & POLLOUT)//群发
             {
-
-            }
-            else if(fds[i].revents & POLLRDHUP)
-            {
-
-            }
-            else if(fds[i].revents & POLLERR)
-            {
-
+                ret = write(fds[i].fd, finalBuff, strlen(finalBuff));
+                assert(ret >= 0);
+                fds[i].events = POLLIN;                
             }
         }
     }
