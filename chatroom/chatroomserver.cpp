@@ -100,6 +100,10 @@ int main(int argc, char *argv[])
             else if(fds[i].revents & POLLERR)//连接发生错误
             {
                 printf("connection error from %d\n", fds[i].fd);
+                close(fds[i].fd);
+                fds[i] = fds[connectedCount];
+                connectedCount--;
+                printf("client %d left\n", fds[i].fd);
                 continue;
             }
             else if(fds[i].revents & POLLIN)//已有连接
