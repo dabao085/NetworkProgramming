@@ -2,8 +2,6 @@
  * Author: Chengxiang
  * Date: 2019-2-22
  * chatroom client端, 使用poll进行IO复用。client端接收标准输入和socket读端的数据，同时将标准输入读取的数据写入到socket里，将socket读取的数据写到标准输出中,输入quit退出。
- * V0.1 2019-2-25
- * 添加信号处理(Ctrl-C)
 */
 
 #include "chatroom.h"
