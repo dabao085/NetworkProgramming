@@ -17,7 +17,18 @@
 #include <string.h>
 #include <assert.h>
 #include <stdio.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <signal.h>
 
 int Connect(const char *ip_address, int port, int *fd);
+
+int setnonblocking(int fd);
+
+void addfd(int epollfd, int fd);
+
+void sig_handler(int sig);
+
+void addsig(int sig);
 
 #endif
