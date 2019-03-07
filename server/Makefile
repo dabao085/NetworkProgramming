@@ -1,7 +1,7 @@
 CFLAG = -I../include -g
 CLIB = -lpthread
-TARGET = serversimple serverwithfork serverwithepoll serverwiththread serverwithselect
-OBJS = serversimple.o serverwithfork.o serverwithepoll.o serverwiththread.o network.o serverwithselect.o
+TARGET = serversimple serverwithfork serverwithepoll serverwiththread serverwithselect serverwithunifiedeventsource
+OBJS = serversimple.o serverwithfork.o serverwithepoll.o serverwiththread.o network.o serverwithselect.o serverwithunifiedeventsource.o
 all: ${OBJS}
 ${OBJS}: %.o: %.cpp
 	g++ ${CFLAG} -c $<

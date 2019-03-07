@@ -20,6 +20,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <signal.h>
+#include <sys/epoll.h>
 
 int Connect(const char *ip_address, int port, int *fd);
 
