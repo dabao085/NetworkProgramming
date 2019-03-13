@@ -22,4 +22,6 @@
 
 int Connect(const char *ip_address, int port, int *fd);
 
+int setnonblocking(int fd);
+
 #endif

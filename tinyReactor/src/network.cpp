@@ -46,3 +46,11 @@ int Connect(const char *ip_address, int port, int *sockservfd)
 
     return 0;
 }
+
+int setnonblocking(int fd)
+{
+    int oldopt = fcntl(fd, F_GETFL);
+    int newopt = oldopt | O_NONBLOCK;
+    fcntl(fd, F_SETFL, newopt);
+    return oldopt;
+}

@@ -30,7 +30,7 @@ int CEventLoop::addIoev(int fd, io_callback* callback, int event, void *args)
         _io_evs[fd].read_cb = callback;
         _io_evs[fd].rcb_args = args;
     }
-    else
+    else if(event & EPOLLOUT)
     {
         _io_evs[fd].write_cb = callback;
         _io_evs[fd].wcb_args = args;
@@ -127,6 +127,11 @@ int CEventLoop::handleEvents()
                 void *args = ev->wcb_args;
                 ev->write_cb(this, _events[i].data.fd, args);
             }
+            else
+            {
+                printf("other events occurrs!\n");
+            }
+            
         }
     }
     return 0;

@@ -11,7 +11,9 @@
 #include <arpa/inet.h>
 using namespace std;
 
-char g_buff[1024];
+const int MAXBUFF = 1024;
+
+char g_buff[MAXBUFF];
 void readCallback(CEventLoop* loop, int fd, void* args);
 void writeCallback(CEventLoop* loop, int fd, void* args);
 void acceptCallback(CEventLoop* loop, int fd, void* args);
@@ -62,8 +64,8 @@ void acceptCallback(CEventLoop* loop, int fd, void* args)
 
 void readCallback(CEventLoop* loop, int fd, void* args)
 {
-    memset(g_buff, 0, 1024);
-    int ret = read(fd, g_buff, 1024);
+    bzero(g_buff, sizeof(g_buff));
+    int ret = read(fd, g_buff, sizeof(g_buff));
     printf("server read %d chars\n", ret);
     if(ret < 0)
     {
@@ -80,20 +82,22 @@ void readCallback(CEventLoop* loop, int fd, void* args)
         {
             printf("addIoev error!\n");
         }
+        // writeCallback(loop, fd, NULL);
     }
 }
 
 void writeCallback(CEventLoop* loop, int fd, void* args)
 {
-    int ret = write(fd, g_buff, sizeof(g_buff));
-    memset(g_buff, 0, 1024);
+    int ret = write(fd, g_buff, strlen(g_buff));
+    bzero(g_buff, sizeof(g_buff));
     if(ret < 0)
     {
         printf("write error!\n");
     }
     else if(ret == 0)
     {
-        //
+        printf("server write 0 char...\n");
+        loop->delIoev(fd, EPOLLOUT);
     }
     else
     {
