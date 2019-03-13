@@ -5,7 +5,12 @@
 */
 #include "event_loop.h"
 
-int CEventLoop::add_ioev(int fd, io_callback* callback, int event, void *args)
+CEventLoop::CEventLoop()
+{
+    _epollfd = epoll_create1(0);
+}
+
+int CEventLoop::addIoev(int fd, io_callback* callback, int event, void *args)
 {
     int f_oper = 0;   //EPOLL_CTL_ADD, EPOLL_CTL_MOD
     int f_ev = 0;     //EPOLLIN, EPOLLOUT, EPOLLET etc.
@@ -44,7 +49,7 @@ int CEventLoop::add_ioev(int fd, io_callback* callback, int event, void *args)
     return 0;
 }
 
-int CEventLoop::del_ioev(int fd, int event)
+int CEventLoop::delIoev(int fd, int event)
 {
     int f_ev = 0;
     evsIter it = _io_evs.find(fd);
@@ -81,7 +86,7 @@ int CEventLoop::del_ioev(int fd, int event)
     return 0;
 }
 
-int CEventLoop::del_ioev(int fd)
+int CEventLoop::delIoev(int fd)
 {
     evsIter it = _io_evs.find(fd);
     if(it == _io_evs.end()) //could not find the element in event list.
@@ -96,6 +101,32 @@ int CEventLoop::del_ioev(int fd)
         {
             printf("epoll_ctl error!\n");
             return -1;
+        }
+    }
+    return 0;
+}
+
+int CEventLoop::handleEvents()
+{
+    while(1)
+    {
+        evsIter iter;
+        int ret = epoll_wait(_epollfd, _events, 20, 10);
+        for(int i = 0; i < ret; ++i)
+        {
+            iter = _io_evs.find(_events[i].data.fd);
+            assert(iter != _io_evs.end());
+            CIOEvent *ev = &(iter->second);
+            if(_events[i].events & EPOLLIN)
+            {
+                void *args = ev->rcb_args;
+                ev->read_cb(this, _events[i].data.fd, args);
+            }
+            else if(_events[i].events & EPOLLOUT)
+            {
+                void *args = ev->wcb_args;
+                ev->write_cb(this, _events[i].data.fd, args);
+            }
         }
     }
     return 0;

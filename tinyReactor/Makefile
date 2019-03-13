@@ -1,4 +1,4 @@
-SUBDIRS = src
+SUBDIRS = src sample
 all: ${SUBDIRS}
 ${SUBDIRS}:ECHO
 	make -C $@
