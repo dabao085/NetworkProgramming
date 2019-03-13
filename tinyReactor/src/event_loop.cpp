@@ -111,7 +111,7 @@ int CEventLoop::handleEvents()
     while(1)
     {
         evsIter iter;
-        int ret = epoll_wait(_epollfd, _events, 20, 10);
+        int ret = epoll_wait(_epollfd, _events, 20, -1);
         for(int i = 0; i < ret; ++i)
         {
             iter = _io_evs.find(_events[i].data.fd);
