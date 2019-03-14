@@ -10,6 +10,11 @@ CEventLoop::CEventLoop()
     _epollfd = epoll_create1(0);
 }
 
+CEventLoop::~CEventLoop()
+{
+    close(_epollfd);
+}
+
 int CEventLoop::addIoev(int fd, io_callback* callback, int event, void *args)
 {
     int f_oper = 0;   //EPOLL_CTL_ADD, EPOLL_CTL_MOD
@@ -126,6 +131,11 @@ int CEventLoop::handleEvents()
             {
                 void *args = ev->wcb_args;
                 ev->write_cb(this, _events[i].data.fd, args);
+            }
+            else if(_events[i].events & EPOLLHUP)
+            {
+                printf("disconnection from client: %d\n", _events[i].data.fd);
+                delIoev(_events[i].data.fd);
             }
             else
             {

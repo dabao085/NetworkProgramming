@@ -18,6 +18,7 @@ class CEventLoop    //support IO event only currently
 {
 public:
     CEventLoop();
+    ~CEventLoop();
     int handleEvents();
     int addIoev(int fd, io_callback* callback, int event, void *args = NULL);
     int delIoev(int fd, int event);

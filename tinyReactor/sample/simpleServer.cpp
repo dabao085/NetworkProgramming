@@ -37,6 +37,8 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    //set sockserv as nonblocking
+    setnonblocking(sockserv);
     CEventLoop evloop;
     evloop.addIoev(sockserv, acceptCallback, EPOLLIN);
     evloop.handleEvents();
