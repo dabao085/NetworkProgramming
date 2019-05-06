@@ -14,12 +14,13 @@
 #include <assert.h>
 #include <string.h>
 #include <unordered_map>
-class CEventLoop    //support IO event only currently
+#include <boost/noncopyable.hpp>
+class CEventLoop : boost::noncopyable    //support IO event only currently, "private" is default.
 {
 public:
     CEventLoop();
     ~CEventLoop();
-    int handleEvents();
+    int handleEvents(); //loop
     int addIoev(int fd, io_callback* callback, int event, void *args = NULL);
     int delIoev(int fd, int event);
     int delIoev(int fd);
